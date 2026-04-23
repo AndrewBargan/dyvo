@@ -10,6 +10,7 @@ import { WheelSegment } from "../../../entities/interfaces";
 
 export class Wheel extends Container {
   private wheelContainer: Container;
+  private static readonly BASE_DIAMETER = WHEEL_RADIUS * 2;
 
   constructor() {
     super();
@@ -25,6 +26,13 @@ export class Wheel extends Container {
 
   public reset() {
     this.wheelContainer.rotation = 0;
+  }
+
+  public resize(width: number, height: number) {
+    const maxDiameter = Math.min(width * 0.84, height * 0.5);
+    const responsiveScale = maxDiameter / Wheel.BASE_DIAMETER;
+    const clampedScale = Math.max(0.58, Math.min(1, responsiveScale));
+    this.scale.set(clampedScale);
   }
 
   public async spinWeighted(): Promise<WheelSegment> {
@@ -98,10 +106,10 @@ export class Wheel extends Container {
 
   private createPointer(): Graphics {
     return new Graphics()
-      .moveTo(0, -318)
-      .lineTo(-26, -370)
-      .lineTo(26, -370)
-      .lineTo(0, -318)
+      .moveTo(0, -304)
+      .lineTo(-26, -356)
+      .lineTo(26, -356)
+      .lineTo(0, -304)
       .fill({ color: 0xffffff })
       .stroke({ width: 3, color: 0x1f1f1f });
   }
