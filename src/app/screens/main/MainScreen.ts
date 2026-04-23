@@ -1,19 +1,28 @@
 import { animate } from "motion";
 import type { ObjectTarget } from "motion/react";
 import type { Ticker } from "pixi.js";
-import { Container, Graphics, Text } from "pixi.js";
+import { Container } from "pixi.js";
+
+import { waitFor } from "../../../engine/utils/waitFor";
+import {
+  BACKGROUND_MUSIC,
+  BASE_TITLE,
+  ENTER_BONUS_BUTTON_TEXT,
+  INITIAL_BALANCE,
+  PRESS_TO_SPIN_SPINNING_TEXT,
+  PRESS_TO_SPIN_TEXT,
+  START_SPIN_FINAL_SOUND,
+  START_SPIN_INITIL_SOUND,
+  WON_RESULT_LABEL,
+} from "../../entities/constants";
 import { engine } from "../../getEngine";
 import { PausePopup } from "../../popups/PausePopup";
 import { Button } from "../../ui/Button";
 import { Label } from "../../ui/Label";
-import { RoundedBox } from "../../ui/RoundedBox";
-import { waitFor } from "../../../engine/utils/waitFor";
-import {
-  INITIAL_BALANCE,
-  SEGMENT_COLORS,
-  SEGMENTS,
-  TAU,
-} from "../../entities/constants";
+
+import { GameHud } from "./components/GameHud";
+import { SpinButton } from "./components/SpinButton";
+import { Wheel } from "./components/Wheel";
 
 /** The screen that holds the app */
 export class MainScreen extends Container {
@@ -21,25 +30,18 @@ export class MainScreen extends Container {
   public static assetBundles = ["main"];
   public mainContainer: Container;
 
-  private hudContainer: Container;
   private baseContainer: Container;
   private bonusContainer: Container;
-  private wheelContainer: Container;
 
-  private balanceBox: RoundedBox;
-  private winBox: RoundedBox;
-  private balanceValueLabel: Label;
-  private winValueLabel: Label;
+  private hud: GameHud;
+  private wheel: Wheel;
 
   private baseTitle: Label;
   private enterBonusButton: Button;
 
-  private spinButton: Button;
+  private spinButton: SpinButton;
   private pressToSpinLabel: Label;
   private resultLabel: Label;
-
-  private pointer: Graphics;
-  private wheelDisc: Graphics;
 
   private balance = INITIAL_BALANCE;
   private lastWin = 0;
@@ -53,8 +55,8 @@ export class MainScreen extends Container {
     this.mainContainer = new Container();
     this.addChild(this.mainContainer);
 
-    this.hudContainer = new Container();
-    this.mainContainer.addChild(this.hudContainer);
+    this.hud = new GameHud();
+    this.mainContainer.addChild(this.hud);
 
     this.baseContainer = new Container();
     this.mainContainer.addChild(this.baseContainer);
@@ -64,49 +66,14 @@ export class MainScreen extends Container {
     this.bonusContainer.visible = false;
     this.mainContainer.addChild(this.bonusContainer);
 
-    this.wheelContainer = new Container();
-    this.bonusContainer.addChild(this.wheelContainer);
-
-    this.balanceBox = new RoundedBox({ width: 210, height: 88, shadow: false });
-    this.winBox = new RoundedBox({ width: 210, height: 88, shadow: false });
-    this.hudContainer.addChild(this.balanceBox, this.winBox);
-
-    const balanceTitle = new Label({
-      text: "BALANCE",
-      style: { fill: 0x4a4a4a, fontSize: 20 },
-    });
-    balanceTitle.y = -18;
-    this.balanceBox.addChild(balanceTitle);
-
-    this.balanceValueLabel = new Label({
-      text: this.formatAmount(this.balance),
-      style: { fill: 0x111111, fontSize: 28 },
-    });
-    this.balanceValueLabel.y = 14;
-    this.balanceBox.addChild(this.balanceValueLabel);
-
-    const winTitle = new Label({
-      text: "WIN",
-      style: { fill: 0x4a4a4a, fontSize: 20 },
-    });
-    winTitle.y = -18;
-    this.winBox.addChild(winTitle);
-
-    this.winValueLabel = new Label({
-      text: this.formatAmount(this.lastWin),
-      style: { fill: 0x111111, fontSize: 28 },
-    });
-    this.winValueLabel.y = 14;
-    this.winBox.addChild(this.winValueLabel);
-
     this.baseTitle = new Label({
-      text: "Lucky Wheel Bonus",
+      text: BASE_TITLE,
       style: { fill: 0xffffff, fontSize: 62 },
     });
     this.baseContainer.addChild(this.baseTitle);
 
     this.enterBonusButton = new Button({
-      text: "Play",
+      text: ENTER_BONUS_BUTTON_TEXT,
       width: 220,
       height: 110,
     });
@@ -116,7 +83,7 @@ export class MainScreen extends Container {
     this.baseContainer.addChild(this.enterBonusButton);
 
     this.pressToSpinLabel = new Label({
-      text: "Press to spin",
+      text: PRESS_TO_SPIN_TEXT,
       style: { fill: 0xffffff, fontSize: 42 },
     });
     this.bonusContainer.addChild(this.pressToSpinLabel);
@@ -128,19 +95,17 @@ export class MainScreen extends Container {
     this.resultLabel.alpha = 0;
     this.bonusContainer.addChild(this.resultLabel);
 
-    this.wheelDisc = this.createWheelDisc(270);
-    this.wheelContainer.addChild(this.wheelDisc);
+    this.wheel = new Wheel();
+    this.bonusContainer.addChild(this.wheel);
 
-    this.pointer = this.createPointer();
-    this.bonusContainer.addChild(this.pointer);
-
-    this.spinButton = new Button({ text: "Spin", width: 220, height: 110 });
+    this.spinButton = new SpinButton();
     this.spinButton.onPress.connect(() => {
       void this.startSpin();
     });
     this.bonusContainer.addChild(this.spinButton);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public update(_time: Ticker) {
     if (this.paused) return;
   }
@@ -162,31 +127,30 @@ export class MainScreen extends Container {
     this.bonusContainer.visible = false;
     this.baseContainer.alpha = 1;
     this.baseContainer.visible = true;
-    this.wheelContainer.rotation = 0;
     this.resultLabel.alpha = 0;
     this.resultLabel.text = "";
     this.pressToSpinLabel.alpha = 1;
+    this.pressToSpinLabel.text = PRESS_TO_SPIN_TEXT;
+    this.wheel.reset();
   }
 
   public resize(width: number, height: number) {
     const centerX = width * 0.5;
 
-    this.balanceBox.position.set(centerX - 130, 72);
-    this.winBox.position.set(centerX + 130, 72);
+    this.hud.resize(width);
 
     this.baseTitle.position.set(centerX, height * 0.35);
     this.enterBonusButton.position.set(centerX, height * 0.62);
 
     this.bonusContainer.position.set(centerX, height * 0.5);
     this.pressToSpinLabel.position.set(0, -height * 0.34 - 20);
-    this.wheelContainer.position.set(0, -20);
-    this.pointer.position.set(0, -318);
+    this.wheel.position.set(0, 0);
     this.spinButton.position.set(0, height * 0.33);
     this.resultLabel.position.set(0, height * 0.22 + 20);
   }
 
   public async show(): Promise<void> {
-    engine().audio.bgm.play("main/sounds/bgm-main.mp3", { volume: 0.5 });
+    engine().audio.bgm.play(BACKGROUND_MUSIC, { volume: 0.5 });
     this.refreshHud();
 
     this.alpha = 0;
@@ -207,59 +171,6 @@ export class MainScreen extends Container {
     if (!engine().navigation.currentPopup) {
       void engine().navigation.presentPopup(PausePopup);
     }
-  }
-
-  private createWheelDisc(radius: number): Graphics {
-    const g = new Graphics();
-    const sliceAngle = TAU / SEGMENTS.length;
-
-    for (let i = 0; i < SEGMENTS.length; i++) {
-      const startAngle = -Math.PI / 2 + i * sliceAngle;
-      const endAngle = startAngle + sliceAngle;
-
-      g.moveTo(0, 0)
-        .arc(0, 0, radius, startAngle, endAngle)
-        .lineTo(0, 0)
-        .fill({ color: SEGMENT_COLORS[i] })
-        .stroke({ width: 3, color: 0x2b2b2b, alpha: 0.85 });
-
-      const mid = startAngle + sliceAngle * 0.5;
-      const amountLabel = new Text({
-        text: this.formatAmount(SEGMENTS[i].amount),
-        style: {
-          fontFamily: "Arial Rounded MT Bold",
-          fontSize: 30,
-          fill: 0x111111,
-          align: "center",
-        },
-      });
-      amountLabel.anchor.set(0.5);
-      amountLabel.position.set(
-        Math.cos(mid) * radius * 0.68,
-        Math.sin(mid) * radius * 0.68,
-      );
-      amountLabel.rotation = mid + Math.PI * 0.5;
-      g.addChild(amountLabel);
-    }
-
-    const centerPin = new Graphics()
-      .circle(0, 0, 44)
-      .fill({ color: 0xffffff })
-      .stroke({ width: 4, color: 0x1f1f1f });
-
-    g.addChild(centerPin);
-
-    return g;
-  }
-
-  private createPointer(): Graphics {
-    return new Graphics()
-      .moveTo(0, 0)
-      .lineTo(-26, -52)
-      .lineTo(26, -52)
-      .lineTo(0, 0)
-      .fill({ color: 0xffffff })
-      .stroke({ width: 3, color: 0x1f1f1f });
   }
 
   private async transitionToBonus(): Promise<void> {
@@ -308,42 +219,25 @@ export class MainScreen extends Container {
     if (!this.inBonus || this.spinning) return;
 
     this.spinning = true;
-    this.spinButton.enabled = false;
+    this.spinButton.setSpinning(true);
     this.enterBonusButton.enabled = false;
     this.resultLabel.alpha = 0;
     this.resultLabel.text = "";
-    this.pressToSpinLabel.text = "Spinning...";
+    this.pressToSpinLabel.text = PRESS_TO_SPIN_SPINNING_TEXT;
 
-    const winnerIndex = this.pickWeightedSegmentIndex();
-    const winner = SEGMENTS[winnerIndex];
-
-    const sliceAngle = TAU / SEGMENTS.length;
-    const targetAngle = (TAU - (winnerIndex + 0.5) * sliceAngle) % TAU;
-    const currentNorm = ((this.wheelContainer.rotation % TAU) + TAU) % TAU;
-    const baseDelta =
-      targetAngle >= currentNorm
-        ? targetAngle - currentNorm
-        : TAU - currentNorm + targetAngle;
-    const fullTurns = 5 + Math.floor(Math.random() * 2);
-    const spinAmount = baseDelta + fullTurns * TAU;
-
-    engine().audio.sfx.play("main/sounds/button.wav", { volume: 0.7 });
-    await animate(
-      this.wheelContainer,
-      { rotation: this.wheelContainer.rotation + spinAmount },
-      {
-        duration: 4.2,
-        ease: [0.06, 0.9, 0.22, 1],
-      },
-    );
+    engine().audio.sfx.play(START_SPIN_INITIL_SOUND, { volume: 0.7 });
+    const winner = await this.wheel.spinWeighted();
 
     this.lastWin = winner.amount;
     this.balance += winner.amount;
     this.refreshHud();
 
-    engine().audio.sfx.play("main/sounds/final.wav", { volume: 0.9 });
-    this.resultLabel.text = `You won ${this.formatAmount(winner.amount)}`;
-    this.pressToSpinLabel.text = "Press to spin";
+    engine().audio.sfx.play(START_SPIN_FINAL_SOUND, { volume: 0.9 });
+    this.resultLabel.text = WON_RESULT_LABEL.replace(
+      "{WON}",
+      winner.amount.toFixed(2),
+    );
+    this.pressToSpinLabel.text = PRESS_TO_SPIN_TEXT;
     await animate(
       this.resultLabel,
       { alpha: 1 },
@@ -364,31 +258,12 @@ export class MainScreen extends Container {
     await waitFor(1.1);
     await this.transitionToBase();
 
-    this.spinButton.enabled = true;
+    this.spinButton.setSpinning(false);
     this.enterBonusButton.enabled = true;
     this.spinning = false;
   }
 
-  private pickWeightedSegmentIndex(): number {
-    const totalWeight = SEGMENTS.reduce((sum, item) => sum + item.weight, 0);
-    let roll = Math.random() * totalWeight;
-
-    for (let i = 0; i < SEGMENTS.length; i++) {
-      roll -= SEGMENTS[i].weight;
-      if (roll <= 0) {
-        return i;
-      }
-    }
-
-    return SEGMENTS.length - 1;
-  }
-
-  private formatAmount(amount: number): string {
-    return amount.toFixed(2);
-  }
-
   private refreshHud() {
-    this.balanceValueLabel.text = this.formatAmount(this.balance);
-    this.winValueLabel.text = this.formatAmount(this.lastWin);
+    this.hud.setValues(this.balance, this.lastWin);
   }
 }
