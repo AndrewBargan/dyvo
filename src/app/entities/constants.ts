@@ -20,11 +20,11 @@ export const BASE_TITLE = "Lucky Wheel Bonus";
 export const ENTER_BONUS_BUTTON_TEXT = "Play";
 export const PRESS_TO_SPIN_TEXT = "Press to spin";
 export const PRESS_TO_SPIN_SPINNING_TEXT = "Spinning...";
-export const SPIN_TEXT = "Spin";
+export const SPIN_BUTTON_TEXT = "Spin";
 export const BALANCE_TITLE = "BALANCE";
 export const WIN_TITLE = "WIN";
+export const WON_RESULT_LABEL = `You won {WON}`;
+
 export const BACKGROUND_MUSIC = "main/sounds/bgm-main.mp3";
 export const START_SPIN_INITIL_SOUND = "main/sounds/button.wav";
 export const START_SPIN_FINAL_SOUND = "main/sounds/final.wav";
-
-export const WON_RESULT_LABEL = `You won {WON}`;
