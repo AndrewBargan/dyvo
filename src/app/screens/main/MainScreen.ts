@@ -152,7 +152,6 @@ export class MainScreen extends Container {
 
     this.baseTitle.position.set(centerX, height * 0.35);
     this.enterBonusButton.position.set(centerX, height * 0.62);
-
     this.bonusContainer.position.set(centerX, height * 0.5);
     this.pressToSpinLabel.position.set(0, -height * 0.34 - 20);
     this.wheel.position.set(0, 0);
@@ -241,18 +240,21 @@ export class MainScreen extends Container {
     this.pressToSpinLabel.text = PRESS_TO_SPIN_SPINNING_TEXT;
 
     engine().audio.sfx.play(START_SPIN_INITIL_SOUND, { volume: 0.7 });
-    const winner = await this.wheel.spinWeighted();
 
+    const winner = await this.wheel.spinWeighted();
     this.lastWin = winner.amount;
     this.balance += winner.amount;
     this.refreshHud();
 
     engine().audio.sfx.play(START_SPIN_FINAL_SOUND, { volume: 0.9 });
+
     this.resultLabel.text = WON_RESULT_LABEL.replace(
       "{WON}",
       winner.amount.toFixed(2),
     );
+
     this.pressToSpinLabel.text = PRESS_TO_SPIN_TEXT;
+
     await animate(
       this.resultLabel,
       { alpha: 1 },
@@ -264,6 +266,7 @@ export class MainScreen extends Container {
       { x: 1.08, y: 1.08 },
       { duration: 0.16, ease: "easeOut" },
     );
+
     await animate(
       this.resultLabel.scale,
       { x: 1, y: 1 },
@@ -271,6 +274,7 @@ export class MainScreen extends Container {
     );
 
     await waitFor(1.1);
+
     await this.transitionToBase();
 
     this.spinButton.enabled = true;
