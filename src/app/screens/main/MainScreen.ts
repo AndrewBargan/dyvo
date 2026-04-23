@@ -11,6 +11,7 @@ import {
   INITIAL_BALANCE,
   PRESS_TO_SPIN_SPINNING_TEXT,
   PRESS_TO_SPIN_TEXT,
+  SPIN_BUTTON_TEXT,
   START_SPIN_FINAL_SOUND,
   START_SPIN_INITIL_SOUND,
   WON_RESULT_LABEL,
@@ -21,7 +22,6 @@ import { Button } from "../../ui/Button";
 import { Label } from "../../ui/Label";
 
 import { GameHud } from "./components/GameHud";
-import { SpinButton } from "./components/SpinButton";
 import { Wheel } from "./components/Wheel";
 
 /** The screen that holds the app */
@@ -39,7 +39,7 @@ export class MainScreen extends Container {
   private baseTitle: Label;
   private enterBonusButton: Button;
 
-  private spinButton: SpinButton;
+  private spinButton: Button;
   private pressToSpinLabel: Label;
   private resultLabel: Label;
 
@@ -103,7 +103,11 @@ export class MainScreen extends Container {
     this.wheel = new Wheel();
     this.bonusContainer.addChild(this.wheel);
 
-    this.spinButton = new SpinButton();
+    this.spinButton = new Button({
+      text: SPIN_BUTTON_TEXT,
+      width: 220,
+      height: 110,
+    });
 
     this.spinButton.onPress.connect(() => {
       void this.startSpin();
@@ -153,7 +157,7 @@ export class MainScreen extends Container {
     this.pressToSpinLabel.position.set(0, -height * 0.34 - 20);
     this.wheel.position.set(0, 0);
     this.spinButton.position.set(0, height * 0.33);
-    this.resultLabel.position.set(0, height * 0.22 + 20);
+    this.resultLabel.position.set(0, height * 0.22 + 30);
   }
 
   public async show(): Promise<void> {
@@ -230,7 +234,7 @@ export class MainScreen extends Container {
     if (!this.inBonus || this.spinning) return;
 
     this.spinning = true;
-    this.spinButton.setSpinning(true);
+    this.spinButton.enabled = false;
     this.enterBonusButton.enabled = false;
     this.resultLabel.alpha = 0;
     this.resultLabel.text = "";
@@ -269,7 +273,7 @@ export class MainScreen extends Container {
     await waitFor(1.1);
     await this.transitionToBase();
 
-    this.spinButton.setSpinning(false);
+    this.spinButton.enabled = true;
     this.enterBonusButton.enabled = true;
     this.spinning = false;
   }
