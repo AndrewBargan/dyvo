@@ -153,11 +153,11 @@ export class MainScreen extends Container {
     this.baseTitle.position.set(centerX, height * 0.35);
     this.enterBonusButton.position.set(centerX, height * 0.62);
     this.bonusContainer.position.set(centerX, height * 0.5);
-    this.pressToSpinLabel.position.set(0, -height * 0.34 - 20);
+    this.pressToSpinLabel.position.set(0, -height * 0.34 - 10);
     this.wheel.resize(width, height);
     this.wheel.position.set(0, 0);
-    this.spinButton.position.set(0, height * 0.33);
-    this.resultLabel.position.set(0, height * 0.22 + 30);
+    this.spinButton.position.set(0, height * 0.33 + 50);
+    this.resultLabel.position.set(0, height * 0.22 + 50);
   }
 
   public async show(): Promise<void> {

@@ -106,10 +106,10 @@ export class Wheel extends Container {
 
   private createPointer(): Graphics {
     return new Graphics()
-      .moveTo(0, -304)
-      .lineTo(-26, -356)
-      .lineTo(26, -356)
-      .lineTo(0, -304)
+      .moveTo(0, -291)
+      .lineTo(-26, -343)
+      .lineTo(26, -343)
+      .lineTo(0, -291)
       .fill({ color: 0xffffff })
       .stroke({ width: 3, color: 0x1f1f1f });
   }
