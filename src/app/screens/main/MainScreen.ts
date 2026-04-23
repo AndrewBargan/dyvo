@@ -2,32 +2,18 @@ import { animate } from "motion";
 import type { ObjectTarget } from "motion/react";
 import type { Ticker } from "pixi.js";
 import { Container, Graphics, Text } from "pixi.js";
-
 import { engine } from "../../getEngine";
 import { PausePopup } from "../../popups/PausePopup";
 import { Button } from "../../ui/Button";
 import { Label } from "../../ui/Label";
 import { RoundedBox } from "../../ui/RoundedBox";
 import { waitFor } from "../../../engine/utils/waitFor";
-
-type WheelSegment = {
-  amount: number;
-  weight: number;
-};
-
-const SEGMENTS: WheelSegment[] = [
-  { amount: 2.0, weight: 200 },
-  { amount: 50.0, weight: 76 },
-  { amount: 500.0, weight: 12 },
-  { amount: 2.0, weight: 200 },
-  { amount: 100.0, weight: 62 },
-  { amount: 50.0, weight: 81 },
-  { amount: 2.0, weight: 200 },
-  { amount: 75.0, weight: 74 },
-];
-
-const INITIAL_BALANCE = 1000;
-const TAU = Math.PI * 2;
+import {
+  INITIAL_BALANCE,
+  SEGMENT_COLORS,
+  SEGMENTS,
+  TAU,
+} from "../../entities/constants";
 
 /** The screen that holds the app */
 export class MainScreen extends Container {
@@ -155,9 +141,6 @@ export class MainScreen extends Container {
     this.bonusContainer.addChild(this.spinButton);
   }
 
-  public prepare() {}
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public update(_time: Ticker) {
     if (this.paused) return;
   }
@@ -229,10 +212,6 @@ export class MainScreen extends Container {
   private createWheelDisc(radius: number): Graphics {
     const g = new Graphics();
     const sliceAngle = TAU / SEGMENTS.length;
-    const colors = [
-      0xff6b6b, 0xff922b, 0xffe066, 0x63e6be, 0x4dabf7, 0x9775fa, 0xf783ac,
-      0x74c0fc,
-    ];
 
     for (let i = 0; i < SEGMENTS.length; i++) {
       const startAngle = -Math.PI / 2 + i * sliceAngle;
@@ -241,7 +220,7 @@ export class MainScreen extends Container {
       g.moveTo(0, 0)
         .arc(0, 0, radius, startAngle, endAngle)
         .lineTo(0, 0)
-        .fill({ color: colors[i] })
+        .fill({ color: SEGMENT_COLORS[i] })
         .stroke({ width: 3, color: 0x2b2b2b, alpha: 0.85 });
 
       const mid = startAngle + sliceAngle * 0.5;
