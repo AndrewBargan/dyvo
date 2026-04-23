@@ -2,8 +2,8 @@ import { WheelSegment } from "./interfaces";
 
 export const INITIAL_BALANCE = 1000;
 export const TAU = Math.PI * 2;
-export const WHEEL_RADIUS = 270;
-export const WHEEL_SPINNING_DURATION = 4.2;
+export const WHEEL_RADIUS = 280;
+export const WHEEL_SPINNING_DURATION = 5;
 
 export const SEGMENTS: WheelSegment[] = [
   { amount: 2.0, weight: 200, color: 0xff6b6b },

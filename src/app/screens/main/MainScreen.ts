@@ -70,6 +70,7 @@ export class MainScreen extends Container {
       text: BASE_TITLE,
       style: { fill: 0xffffff, fontSize: 62 },
     });
+
     this.baseContainer.addChild(this.baseTitle);
 
     this.enterBonusButton = new Button({
@@ -77,21 +78,25 @@ export class MainScreen extends Container {
       width: 220,
       height: 110,
     });
+
     this.enterBonusButton.onPress.connect(() => {
       void this.transitionToBonus();
     });
+
     this.baseContainer.addChild(this.enterBonusButton);
 
     this.pressToSpinLabel = new Label({
       text: PRESS_TO_SPIN_TEXT,
       style: { fill: 0xffffff, fontSize: 42 },
     });
+
     this.bonusContainer.addChild(this.pressToSpinLabel);
 
     this.resultLabel = new Label({
       text: "",
       style: { fill: 0xffe066, fontSize: 44 },
     });
+
     this.resultLabel.alpha = 0;
     this.bonusContainer.addChild(this.resultLabel);
 
@@ -99,9 +104,11 @@ export class MainScreen extends Container {
     this.bonusContainer.addChild(this.wheel);
 
     this.spinButton = new SpinButton();
+
     this.spinButton.onPress.connect(() => {
       void this.startSpin();
     });
+
     this.bonusContainer.addChild(this.spinButton);
   }
 
@@ -151,9 +158,11 @@ export class MainScreen extends Container {
 
   public async show(): Promise<void> {
     engine().audio.bgm.play(BACKGROUND_MUSIC, { volume: 0.5 });
+
     this.refreshHud();
 
     this.alpha = 0;
+
     await animate(this, { alpha: 1 } as ObjectTarget<this>, {
       duration: 0.35,
       ease: "linear",
@@ -186,6 +195,7 @@ export class MainScreen extends Container {
       { alpha: 0 },
       { duration: 0.25, ease: "linear" },
     );
+
     await animate(
       this.bonusContainer,
       { alpha: 1, y: this.bonusContainer.y - 36 },
@@ -205,6 +215,7 @@ export class MainScreen extends Container {
       { alpha: 0 },
       { duration: 0.25, ease: "linear" },
     );
+
     await animate(
       this.baseContainer,
       { alpha: 1, y: this.baseContainer.y - 20 },
