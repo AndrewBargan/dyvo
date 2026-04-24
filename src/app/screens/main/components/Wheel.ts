@@ -10,7 +10,6 @@ import { WheelSegment } from "../../../entities/interfaces";
 
 export class Wheel extends Container {
   private wheelContainer: Container;
-  private static readonly BASE_DIAMETER = WHEEL_RADIUS * 2;
 
   constructor() {
     super();
@@ -24,13 +23,14 @@ export class Wheel extends Container {
     this.wheelContainer.y = -20;
   }
 
-  public reset() {
+  public reset(): void {
     this.wheelContainer.rotation = 0;
   }
 
-  public resize(width: number, height: number) {
+  public resize(width: number, height: number): void {
     const maxDiameter = Math.min(width * 0.84, height * 0.5);
-    const responsiveScale = maxDiameter / Wheel.BASE_DIAMETER;
+    const baseDiameter = WHEEL_RADIUS * 2;
+    const responsiveScale = maxDiameter / baseDiameter;
     const clampedScale = Math.max(0.58, Math.min(1, responsiveScale));
     this.scale.set(clampedScale);
   }

@@ -13,7 +13,7 @@ import {
   PRESS_TO_SPIN_TEXT,
   SPIN_BUTTON_TEXT,
   START_SPIN_FINAL_SOUND,
-  START_SPIN_INITIL_SOUND,
+  START_SPIN_INITIAL_SOUND,
   WON_RESULT_LABEL,
 } from "../../entities/constants";
 import { engine } from "../../getEngine";
@@ -116,21 +116,25 @@ export class MainScreen extends Container {
     this.bonusContainer.addChild(this.spinButton);
   }
 
+  /** Update the screen */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public update(_time: Ticker) {
     if (this.paused) return;
   }
 
+  /** Pause gameplay - automatically fired when a popup is presented */
   public async pause() {
     this.interactiveChildren = false;
     this.paused = true;
   }
 
+  /** Resume gameplay */
   public async resume() {
     this.interactiveChildren = true;
     this.paused = false;
   }
 
+  /** Fully reset */
   public reset() {
     this.spinning = false;
     this.inBonus = false;
@@ -145,11 +149,11 @@ export class MainScreen extends Container {
     this.wheel.reset();
   }
 
+  /** Resize the screen, fired whenever window size changes */
   public resize(width: number, height: number) {
-    const centerX = width * 0.5;
-
     this.hud.resize(width);
 
+    const centerX = width * 0.5;
     this.baseTitle.position.set(centerX, height * 0.35);
     this.enterBonusButton.position.set(centerX, height * 0.62);
     this.bonusContainer.position.set(centerX, height * 0.5);
@@ -160,6 +164,7 @@ export class MainScreen extends Container {
     this.resultLabel.position.set(0, height * 0.22 + 50);
   }
 
+  /** Show screen with animations */
   public async show(): Promise<void> {
     engine().audio.bgm.play(BACKGROUND_MUSIC, { volume: 0.5 });
 
@@ -173,6 +178,7 @@ export class MainScreen extends Container {
     });
   }
 
+  /** Hide screen with animations */
   public async hide(): Promise<void> {
     await animate(this, { alpha: 0 } as ObjectTarget<this>, {
       duration: 0.2,
@@ -180,6 +186,7 @@ export class MainScreen extends Container {
     });
   }
 
+  /** Auto pause the app when window go out of focus */
   public blur() {
     if (!engine().navigation.currentPopup) {
       void engine().navigation.presentPopup(PausePopup);
@@ -240,7 +247,7 @@ export class MainScreen extends Container {
     this.resultLabel.text = "";
     this.pressToSpinLabel.text = PRESS_TO_SPIN_SPINNING_TEXT;
 
-    engine().audio.sfx.play(START_SPIN_INITIL_SOUND, { volume: 0.7 });
+    engine().audio.sfx.play(START_SPIN_INITIAL_SOUND, { volume: 0.7 });
 
     const winner = await this.wheel.spinWeighted();
     this.lastWin = winner.amount;

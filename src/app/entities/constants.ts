@@ -26,5 +26,5 @@ export const WIN_TITLE = "WIN";
 export const WON_RESULT_LABEL = `You won {WON}`;
 
 export const BACKGROUND_MUSIC = "main/sounds/bgm-main.mp3";
-export const START_SPIN_INITIL_SOUND = "main/sounds/button.wav";
+export const START_SPIN_INITIAL_SOUND = "main/sounds/button.wav";
 export const START_SPIN_FINAL_SOUND = "main/sounds/final.wav";

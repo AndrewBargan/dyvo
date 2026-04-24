@@ -45,13 +45,13 @@ export class GameHud extends Container {
     this.winBox.addChild(this.winValueLabel);
   }
 
-  public resize(width: number) {
+  public resize(width: number): void {
     const centerX = width * 0.5;
     this.balanceBox.position.set(centerX - 130, 72);
     this.winBox.position.set(centerX + 130, 72);
   }
 
-  public setValues(balance: number, win: number) {
+  public setValues(balance: number, win: number): void {
     this.balanceValueLabel.text = this.formatAmount(balance);
     this.winValueLabel.text = this.formatAmount(win);
   }
